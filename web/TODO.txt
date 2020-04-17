@@ -1,1 +1,4 @@
+fix zoom
+remove toolbar
 file upload
+url upload

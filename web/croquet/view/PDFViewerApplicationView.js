@@ -67,6 +67,8 @@ class PDFViewerApplicationView extends Croquet.View {
 
     // SCALE
     onScaleChanging(event) {
+        if(this._ignoreScroll) return;
+
         const {scale} = event;
         const {viewId} = this;
         this.publish('throttle', 'publish', {
@@ -82,7 +84,10 @@ class PDFViewerApplicationView extends Croquet.View {
     }
     updateScale() {
         if(this._updateScale) {
+            this._ignoreScroll = true;
             PDFViewerApplication.pdfViewer.currentScale = this.model.scale;
+            this._ignoreScroll = true;
+
             this._updateScale = false;
         }
     }
