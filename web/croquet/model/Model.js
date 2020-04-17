@@ -24,6 +24,18 @@ class Model extends Croquet.Model {
 
         this.presentationMode = false;
         this.subscribe('presentationMode', 'set', this.setPresentationMode);
+
+        this.scrollMode = 0;
+        this.subscribe('scrollMode', 'set', this.setScrollMode);
+
+        this.spreadMode = 0;
+        this.subscribe('spreadMode', 'set', this.setSpreadMode);
+
+        this.magnetURI = null;
+        this.subscribe('magnetURI', 'set', this.setMagnetURI);
+
+        this.url = null;
+        this.subscribe('url', 'set', this.setURL);
     }
 
     setScroll({viewId, scrollTop, scrollLeft}) {
@@ -55,6 +67,30 @@ class Model extends Croquet.Model {
     setPresentationMode({viewId, active}) {
         this.presentationMode = active;
         this.publish('presentationMode', 'update', viewId);
+    }
+
+    setScrollMode({viewId, mode}) {
+        this.scrollMode = mode;
+        this.publish('scrollMode', 'update', viewId);
+    }
+
+    setSpreadMode({viewId, mode}) {
+        this.spreadMode = mode;
+        this.publish('spreadMode', 'update', viewId);
+    }
+
+    setMagnetURI({viewId, magnetURI}) {
+        delete this.url;
+
+        this.magnetURI = magnetURI;
+        this.publish('magnetURI', 'update', viewId);
+    }
+
+    setURL({viewId, url}) {
+        delete this.magnetURI;
+
+        this.url = url;
+        this.publish('url', 'update', viewId);
     }
 }
 Model.register();

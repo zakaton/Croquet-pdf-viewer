@@ -3,7 +3,8 @@ class PDFViewerApplicationView extends Croquet.View {
         super(model);
         this.model = model;
 
-        PDFViewerApplication.eventBus.on('pagechanging', this.onPageChanging.bind(this));
+        //PDFViewerApplication.eventBus.on('pagechanging', this.onPageChanging.bind(this));
+        PDFViewerApplication.eventBus.on('pagenumberchanged', this.onPageNumberChanged.bind(this));
         this.subscribe('pageNumber', 'update', this.onUpdatePageNumber);
 
         PDFViewerApplication.eventBus.on('scalechanging', this.onScaleChanging.bind(this));
@@ -18,20 +19,32 @@ class PDFViewerApplicationView extends Croquet.View {
         PDFViewerApplication.eventBus.on('presentationmodechanged', this.onPresentationModeChanged.bind(this));
         this.subscribe('presentationMode', 'update', this.onUpdatePresentationMode);
 
+        PDFViewerApplication.eventBus.on('scrollmodechanged', this.onScrollModeChanged.bind(this));
+        this.subscribe('scrollMode', 'update', this.onUpdateScrollMode);
+
         PDFViewerApplication.eventBus.on('spreadmodechanged', this.onSpreadModeChanged.bind(this));
         this.subscribe('spreadMode', 'update', this.onUpdateSpreadMode);
 
         PDFViewerApplication.eventBus.on('fileinputchange', this.onFileInputChange.bind(this));
         this.subscribe('file', 'update', this.onUpdateFile);
-
-        PDFViewerApplication.eventBus.on('scrollmodechanged', this.onScrollModeChanged.bind(this));
-        this.subscribe('scrollMode', 'update', this.onUpdateScrollMode);
         
         this.reset();
     }
 
+    // PAGE NUMBER
     onPageChanging(event) {
         const {pageNumber} = event;
+        const {viewId} = this;
+        this.publish('throttle', 'publish', {
+            scope : 'pageNumber',
+            event : 'set',
+            data : {viewId, pageNumber},
+            minimumDelay : 20,
+        });
+    }
+    onPageNumberChanged(event) {
+        const {value} = event;
+        const pageNumber = Number(value);
         const {viewId} = this;
         this.publish('throttle', 'publish', {
             scope : 'pageNumber',
@@ -52,6 +65,7 @@ class PDFViewerApplicationView extends Croquet.View {
         }
     }
 
+    // SCALE
     onScaleChanging(event) {
         const {scale} = event;
         const {viewId} = this;
@@ -73,7 +87,7 @@ class PDFViewerApplicationView extends Croquet.View {
         }
     }
 
-
+    // ROTATION
     onRotationChanging(event) {
         const {pagesRotation} = event;
         const {viewId} = this;
@@ -95,6 +109,7 @@ class PDFViewerApplicationView extends Croquet.View {
         }
     }
 
+    // SIDEBAR
     onSidebarChanged(event) {
         if(this._ignoreSidebar) return;
 
@@ -125,6 +140,7 @@ class PDFViewerApplicationView extends Croquet.View {
         }
     }
 
+    // PRESENTATION MODE
     onPresentationModeChanged(event) {
         if(this._ignorePresentationMode) return;
 
@@ -152,14 +168,23 @@ class PDFViewerApplicationView extends Croquet.View {
                     document.exitFullscreen();
 
             this._ignorePresentationMode = false;
+
             this._updatePresentaionMode = false;
         }
     }
 
-
-
+    // SCROLL MODE
     onScrollModeChanged(event) {
-        console.log(event);
+        if(this._ignoreScrollMode) return;
+
+        const {mode} = event;
+        const {viewId} = this;
+        this.publish('throttle', 'publish', {
+            scope : 'scrollMode',
+            event : 'set',
+            data : {viewId, mode},
+            minimumDelay : 20,
+        });
     }
     onUpdateScrollMode(viewId) {
         if(this.viewId !== viewId)
@@ -167,13 +192,27 @@ class PDFViewerApplicationView extends Croquet.View {
     }
     updateScrollMode() {
         if(this._updateScrollMode) {
-            // FILL
+            this._ignoreScrollMode = true;
+            PDFViewerApplication.pdfViewer.scrollMode = this.model.scrollMode;
+            this._ignoreScrollMode = false;
+
             this._updateScrollMode = false;
         }
     }
 
+    // SPREAD MODE
     onSpreadModeChanged(event) {
-        console.log(event);
+        if(this._ignoreSpreadMode) return;
+
+        const {mode} = event;
+        const {viewId} = this;
+        this.publish('throttle', 'publish', {
+            scope : 'spreadMode',
+            event : 'set',
+            data : {viewId, mode},
+            minimumDelay : 20,
+        });
+
     }
     onUpdateSpreadMode(viewId) {
         if(this.viewId !== viewId)
@@ -181,11 +220,15 @@ class PDFViewerApplicationView extends Croquet.View {
     }
     updateSpreadMode() {
         if(this._updateSpreadMode) {
-            // FILL
+            this._ignoreSpreadMode = true;
+            PDFViewerApplication.pdfViewer.spreadMode = this.model.spreadMode;
+            this._ignoreSpreadMode = false;
+
             this._updateSpreadMode = false;
         }
     }
 
+    // FILE INPUT
     onFileInputChange(event) {
         console.log(event);
     }
@@ -207,6 +250,8 @@ class PDFViewerApplicationView extends Croquet.View {
         this.updateRotation();
         this.updateSidebar();
         this.updatePresentationMode();
+        this.updateScrollMode();
+        this.updateSpreadMode();
     }
 
     reset() {
@@ -215,6 +260,8 @@ class PDFViewerApplicationView extends Croquet.View {
         this._updateScale = true;
         this._updateSidebar = true;
         this._updatePresentaionMode = true;
+        this._updateScrollMode = true;
+        this._updateSpreadMode = true;
     }
 
     detach() {
