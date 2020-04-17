@@ -1,3 +1,2 @@
-Modes
-Find
-Highlight?
+scroll layout
+file upload

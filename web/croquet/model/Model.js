@@ -20,7 +20,10 @@ class Model extends Croquet.Model {
         this.sidebar = {
             view : 0,
         };
-        this.subscribe('sidebar', 'set', this.setSidebar)
+        this.subscribe('sidebar', 'set', this.setSidebar);
+
+        this.presentationMode = false;
+        this.subscribe('presentationMode', 'set', this.setPresentationMode);
     }
 
     setScroll({viewId, scrollTop, scrollLeft}) {
@@ -47,6 +50,11 @@ class Model extends Croquet.Model {
     setSidebar({viewId, view}) {
         this.sidebar.view = view;
         this.publish('sidebar', 'update', viewId);
+    }
+
+    setPresentationMode({viewId, active}) {
+        this.presentationMode = active;
+        this.publish('presentationMode', 'update', viewId);
     }
 }
 Model.register();

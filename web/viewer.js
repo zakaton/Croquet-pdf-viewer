@@ -2106,6 +2106,9 @@ function webViewerPresentationMode() {
   PDFViewerApplication.requestPresentationMode();
 }
 
+// CROQUET
+window.webViewerPresentationMode = webViewerPresentationMode;
+
 function webViewerPrint() {
   window.print();
 }
@@ -2863,6 +2866,7 @@ function watchScroll(viewAreaElement, callback) {
       }
 
       state.lastY = currentY;
+
       callback(state);
     });
   };
