@@ -33,9 +33,6 @@ class Model extends Croquet.Model {
 
         this.magnetURI = null;
         this.subscribe('magnetURI', 'set', this.setMagnetURI);
-
-        this.url = null;
-        this.subscribe('url', 'set', this.setURL);
     }
 
     setScroll({viewId, scrollTop, scrollLeft}) {
@@ -80,17 +77,8 @@ class Model extends Croquet.Model {
     }
 
     setMagnetURI({viewId, magnetURI}) {
-        delete this.url;
-
         this.magnetURI = magnetURI;
         this.publish('magnetURI', 'update', viewId);
-    }
-
-    setURL({viewId, url}) {
-        delete this.magnetURI;
-
-        this.url = url;
-        this.publish('url', 'update', viewId);
     }
 }
 Model.register();

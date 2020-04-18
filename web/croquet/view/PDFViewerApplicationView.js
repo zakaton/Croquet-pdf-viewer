@@ -5,6 +5,8 @@ class PDFViewerApplicationView extends Croquet.View {
 
         //PDFViewerApplication.eventBus.on('pagechanging', this.onPageChanging.bind(this));
         PDFViewerApplication.eventBus.on('pagenumberchanged', this.onPageNumberChanged.bind(this));
+        PDFViewerApplication.eventBus.on('nextpage', this.onNextPage.bind(this));
+        PDFViewerApplication.eventBus.on('previouspage', this.onPreviousPage.bind(this));
         this.subscribe('pageNumber', 'update', this.onUpdatePageNumber);
 
         PDFViewerApplication.eventBus.on('scalechanging', this.onScaleChanging.bind(this));
@@ -26,8 +28,8 @@ class PDFViewerApplicationView extends Croquet.View {
         this.subscribe('spreadMode', 'update', this.onUpdateSpreadMode);
 
         PDFViewerApplication.eventBus.on('fileinputchange', this.onFileInputChange.bind(this));
-        this.subscribe('file', 'update', this.onUpdateFile);
-        
+        this.subscribe('magnetURI', 'update', this.onUpdateMagnetURI);
+
         this.reset();
     }
 
@@ -35,6 +37,7 @@ class PDFViewerApplicationView extends Croquet.View {
     onPageChanging(event) {
         const {pageNumber} = event;
         const {viewId} = this;
+
         this.publish('throttle', 'publish', {
             scope : 'pageNumber',
             event : 'set',
@@ -45,6 +48,27 @@ class PDFViewerApplicationView extends Croquet.View {
     onPageNumberChanged(event) {
         const {value} = event;
         const pageNumber = Number(value);
+        const {viewId} = this;
+
+        this.publish('throttle', 'publish', {
+            scope : 'pageNumber',
+            event : 'set',
+            data : {viewId, pageNumber},
+            minimumDelay : 20,
+        });
+    }
+    onNextPage(event) {
+        const {pageNumber} = event.source;
+        const {viewId} = this;
+        this.publish('throttle', 'publish', {
+            scope : 'pageNumber',
+            event : 'set',
+            data : {viewId, pageNumber},
+            minimumDelay : 20,
+        });
+    }
+    onPreviousPage(event) {
+        const {pageNumber} = event.source;
         const {viewId} = this;
         this.publish('throttle', 'publish', {
             scope : 'pageNumber',
@@ -67,7 +91,7 @@ class PDFViewerApplicationView extends Croquet.View {
 
     // SCALE
     onScaleChanging(event) {
-        if(this._ignoreScroll) return;
+        if(this._ignoreScale) return;
 
         const {scale} = event;
         const {viewId} = this;
@@ -84,9 +108,9 @@ class PDFViewerApplicationView extends Croquet.View {
     }
     updateScale() {
         if(this._updateScale) {
-            this._ignoreScroll = true;
+            this._ignoreScale = true;
             PDFViewerApplication.pdfViewer.currentScale = this.model.scale;
-            this._ignoreScroll = true;
+            this._ignoreScale = false;
 
             this._updateScale = false;
         }
@@ -141,7 +165,7 @@ class PDFViewerApplicationView extends Croquet.View {
                 PDFViewerApplication.pdfSidebar.close();
             
             this._ignoreSidebar = false;
-            this._updateSidebarView = false;
+            this._updateSidebar = false;
         }
     }
 
@@ -235,16 +259,50 @@ class PDFViewerApplicationView extends Croquet.View {
 
     // FILE INPUT
     onFileInputChange(event) {
-        console.log(event);
+        if(this._ignoreMagnetURI) return;
+
+        const {files} = event.fileInput;
+        console.log(files);
+        this.publish('torrent', 'seed', {
+            files,
+            callback : torrent => {
+                const {viewId} = this;
+                const {magnetURI} = torrent;
+                this.publish('magnetURI', 'set', {magnetURI, viewId});
+            },
+        });
     }
-    onUpdateFile(viewId) {
+
+    onUpdateMagnetURI(viewId) {
         if(this.viewId !== viewId)
-            this._updateFile = true;
+            this._updateMagnetURI = true;
     }
-    _updateFile() {
-        if(this._updateFile) {
-            // FILL
-            this._updateFile = false;
+    updateMagnetURI() {
+        if(this._updateMagnetURI) {
+            if(!this.model.magnetURI) return;
+
+            this._ignoreMagnetURI = true;
+
+            this.publish('torrent', 'add', {
+                torrentId : this.model.magnetURI,
+                callback : torrent => {
+                    const {files} = torrent;
+                    const file = files[0];
+                    file.getBlobURL((error, url) => {
+                        if(error)
+                            console.error(error);
+                        else {
+                            PDFViewerApplication.open({
+                                url,
+                                originalUrl : file.name
+                            });
+                        }
+                    });
+                },
+            });
+            this._ignoreMagnetURI = false;
+
+            this._updateMagnetURI = false;
         }
     }
 
@@ -257,6 +315,7 @@ class PDFViewerApplicationView extends Croquet.View {
         this.updatePresentationMode();
         this.updateScrollMode();
         this.updateSpreadMode();
+        this.updateMagnetURI();
     }
 
     reset() {
@@ -267,6 +326,7 @@ class PDFViewerApplicationView extends Croquet.View {
         this._updatePresentaionMode = true;
         this._updateScrollMode = true;
         this._updateSpreadMode = true;
+        this._updateMangetURI = true;
     }
 
     detach() {

@@ -6842,6 +6842,11 @@ class PDFLinkService {
   }
 
   set page(value) {
+    // CROQUET
+    this.eventBus.dispatch("pagenumberchanged", {
+        source : this.pdfViewer.container,
+        value
+      });
     this.pdfViewer.currentPageNumber = value;
   }
 
