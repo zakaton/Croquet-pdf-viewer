@@ -47,13 +47,18 @@ class WebTorrentView extends Croquet.View {
     add(torrentId, options, callback) {
         // https://github.com/webtorrent/webtorrent/blob/master/docs/api.md#clientgettorrentid
         const torrent = this._client.get(torrentId);
-        if(!torrent) {
-            // https://github.com/webtorrent/webtorrent/blob/master/docs/api.md#clientaddtorrentid-opts-function-ontorrent-torrent-
-            this._client.add(...arguments);
+        if(torrent) {
+            callback = callback || options;
+            if(torrent.done)
+                callback(torrent);
+            else
+                torrent.on('done', () => {
+                    callback(torrent);
+                });
         }
         else {
-            callback = callback || options;
-            callback(torrent);
+            // https://github.com/webtorrent/webtorrent/blob/master/docs/api.md#clientaddtorrentid-opts-function-ontorrent-torrent-
+            this._client.add(...arguments);
         }
     }
     _add({torrentId, options, callback}) {
