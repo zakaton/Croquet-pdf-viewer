@@ -7,7 +7,6 @@ const startSession = () => {
         .then(_ => {
             const {view, model} = _;
             window.view = view;
-            console.log("PDFVIEWER", view);
         });
 }
 

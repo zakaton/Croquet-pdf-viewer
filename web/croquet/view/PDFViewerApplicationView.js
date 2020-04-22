@@ -5,40 +5,30 @@ class PDFViewerApplicationView extends Croquet.View {
 
         this.eventBusListeners = [];
 
-        //PDFViewerApplication.eventBus.on('pagechanging', this.onPageChanging.bind(this));
-        this.addEventBusListener('pagenumberchanged', this.onPageNumberChanged);
-        this.addEventBusListener('nextpage', this.onNextPage);
-        this.addEventBusListener('previouspage', this.onPreviousPage);
-        //PDFViewerApplication.eventBus.on('pagenumberchanged', this.onPageNumberChanged.bind(this));
-        //PDFViewerApplication.eventBus.on('nextpage', this.onNextPage.bind(this));
-        //PDFViewerApplication.eventBus.on('previouspage', this.onPreviousPage.bind(this));
-        this.subscribe('pageNumber', 'update', this.onUpdatePageNumber);
+        //this.addEventBusListener('pagenumberchanged', this.onPageNumberChanged);
+        //this.addEventBusListener('nextpage', this.onNextPage);
+        //this.addEventBusListener('previouspage', this.onPreviousPage);
+        //this.subscribe('pageNumber', 'update', this.onUpdatePageNumber);
 
         this.addEventBusListener('scalechanging', this.onScaleChanging);
-        //PDFViewerApplication.eventBus.on('scalechanging', this.onScaleChanging.bind(this));
         this.subscribe('scale', 'update', this.onUpdateScale);
 
         this.addEventBusListener('rotationchanging', this.onRotationChanging);
-        //PDFViewerApplication.eventBus.on('rotationchanging', this.onRotationChanging.bind(this));
         this.subscribe('rotation', 'update', this.onUpdateRotation);
 
         //PDFViewerApplication.eventBus.on('sidebarviewchanged', this.onSidebarChanged.bind(this));
         //this.subscribe('sidebar', 'update', this.onUpdateSidebar);
 
         this.addEventBusListener('presentationmodechanged', this.onPresentationModeChanged);
-        //PDFViewerApplication.eventBus.on('presentationmodechanged', this.onPresentationModeChanged.bind(this));
         this.subscribe('presentationMode', 'update', this.onUpdatePresentationMode);
 
         this.addEventBusListener('scrollmodechanged', this.onScrollModeChanged);
-        //PDFViewerApplication.eventBus.on('scrollmodechanged', this.onScrollModeChanged.bind(this));
         this.subscribe('scrollMode', 'update', this.onUpdateScrollMode);
 
         this.addEventBusListener('spreadmodechanged', this.onSpreadModeChanged);
-        //PDFViewerApplication.eventBus.on('spreadmodechanged', this.onSpreadModeChanged.bind(this));
         this.subscribe('spreadMode', 'update', this.onUpdateSpreadMode);
 
         this.addEventBusListener('fileinputchange', this.onFileInputChange);
-        //PDFViewerApplication.eventBus.on('fileinputchange', this.onFileInputChange.bind(this));
         this.subscribe('magnetURI', 'update', this.onUpdateMagnetURI);
 
         this.reset();
