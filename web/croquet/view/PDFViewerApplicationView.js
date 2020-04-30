@@ -30,6 +30,7 @@ class PDFViewerApplicationView extends Croquet.View {
 
         this.addEventBusListener('fileinputchange', this.onFileInputChange);
         this.subscribe('magnetURI', 'update', this.onUpdateMagnetURI);
+        this.subscribe('hash', 'update', this.onUpdateHash);
 
         this.reset();
     }
@@ -273,9 +274,21 @@ class PDFViewerApplicationView extends Croquet.View {
     // FILE INPUT
     onFileInputChange(event) {
         if(this._ignoreMagnetURI) return;
+        if(this._ignoreHash) return;
 
         const {files} = event.fileInput;
-        console.log(files);
+        const file = files[0];
+        if(file) {
+            this.publish('asset-manager', 'put', {
+                file,
+                callback : hash => {
+                    const {viewId} = this;
+                    this.publish('hash', 'set', {hash, viewId});
+                }
+            });
+        }
+
+        /*
         this.publish('torrent', 'seed', {
             files,
             callback : torrent => {
@@ -284,6 +297,36 @@ class PDFViewerApplicationView extends Croquet.View {
                 this.publish('magnetURI', 'set', {magnetURI, viewId});
             },
         });
+        */
+    }
+
+    onUpdateHash(viewId) {
+        if(this.viewId !== viewId)
+            this._updateHash = true;
+    }
+    updateHash() {
+        if(this._updateHash) {
+            if(!this.model.hash) return;
+
+            this._ignoreHash = true;
+
+            this.publish('asset-manager', 'get', {
+                hash : this.model.hash,
+                callback : response => {
+                    response.blob()
+                        .then(_blob => {
+                            const blob = new Blob([_blob], {
+                                type : 'application/pdf',
+                            });
+                            const url = URL.createObjectURL(blob);
+                            PDFViewerApplication.open(url);
+                        });
+                    }
+                });
+
+            this._ignoreHash = false;
+            this._updateHash = false;
+        }
     }
 
     onUpdateMagnetURI(viewId) {
@@ -329,6 +372,7 @@ class PDFViewerApplicationView extends Croquet.View {
         this.updateScrollMode();
         this.updateSpreadMode();
         this.updateMagnetURI();
+        this.updateHash();
     }
 
     reset() {
@@ -340,6 +384,7 @@ class PDFViewerApplicationView extends Croquet.View {
         this._updateScrollMode = true;
         this._updateSpreadMode = true;
         this._updateMagnetURI = true;
+        this._updateHash = true;
     }
 
     detach() {

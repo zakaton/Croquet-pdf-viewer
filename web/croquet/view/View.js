@@ -3,6 +3,7 @@ import EventListenerView from "./EventListenerView.js"
 import WebTorrentView from "./WebTorrentView.js";
 import UIView from "./UIView.js";
 import PDFViewerApplicationView from "./PDFViewerApplicationView.js";
+import AssetManagerView from "./AssetManagerView.js";
 
 class View extends Croquet.View {
     constructor(model) {
@@ -14,6 +15,7 @@ class View extends Croquet.View {
         this.webTorrent = new WebTorrentView(model);
         this.ui = new UIView(model);
         this.pdfViewerApplication = new PDFViewerApplicationView(model);
+        this.assetManager = new AssetManagerView(model);
     }
 
     update() {
