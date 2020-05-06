@@ -35,7 +35,6 @@ class UIView extends Croquet.View {
             const {viewId} = this;
 
             if(scrollTop || scrollLeft) {
-                console.log("SCROLL", scrollTop, scrollLeft)
                 this.publish('throttle', 'publish', {
                     scope : 'scroll',
                     event : 'set',
