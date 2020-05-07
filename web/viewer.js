@@ -1788,7 +1788,6 @@ function webViewerInitialized() {
     if (!files || files.length === 0) {
       return;
     }
-
     PDFViewerApplication.eventBus.dispatch("fileinputchange", {
       source: this,
       fileInput: evt.target
@@ -3495,7 +3494,8 @@ const defaultOptions = {
     kind: OptionKind.VIEWER + OptionKind.PREFERENCE
   },
   defaultUrl: {
-    value: "compressed.tracemonkey-pldi-09.pdf",
+    //value: "compressed.tracemonkey-pldi-09.pdf",
+    value : '',
     kind: OptionKind.VIEWER
   },
   defaultZoomValue: {

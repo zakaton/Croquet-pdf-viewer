@@ -32,6 +32,8 @@ class PDFViewerApplicationView extends Croquet.View {
         this.subscribe('magnetURI', 'update', this.onUpdateMagnetURI);
         this.subscribe('hash', 'update', this.onUpdateHash);
 
+        this.addEventBusListener('documentinit', this.onDocumentInit);
+
         this.reset();
     }
 
@@ -44,7 +46,11 @@ class PDFViewerApplicationView extends Croquet.View {
         this.eventBusListeners.forEach(_ => {
             const {event, listener} = _;
             PDFViewerApplication.eventBus.off(event, listener);
-        })
+        });
+    }
+
+    onDocumentInit(event) {
+        this._ignoreScale = false;
     }
 
     // PAGE NUMBER
@@ -108,6 +114,7 @@ class PDFViewerApplicationView extends Croquet.View {
         if(this._ignoreScale) return;
 
         const {scale} = event;
+
         const {viewId} = this;
         this.publish('throttle', 'publish', {
             scope : 'scale',
@@ -319,6 +326,8 @@ class PDFViewerApplicationView extends Croquet.View {
                                 type : 'application/pdf',
                             });
                             const url = URL.createObjectURL(blob);
+
+                            this._ignoreScale = true;
                             PDFViewerApplication.open(url);
                         });
                     }
