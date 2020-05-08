@@ -50,6 +50,7 @@ class PDFViewerApplicationView extends Croquet.View {
     }
 
     onDocumentInit(event) {
+        this.publish('PDFViewerApplication', 'ondocumentinit');
         this._ignoreScale = false;
     }
 
@@ -328,6 +329,7 @@ class PDFViewerApplicationView extends Croquet.View {
                             const url = URL.createObjectURL(blob);
 
                             this._ignoreScale = true;
+                            this.publish('PDFViewerApplication', 'onbeforedocumentinit');
                             PDFViewerApplication.open(url);
                         });
                     }

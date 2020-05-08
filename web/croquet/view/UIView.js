@@ -11,6 +11,10 @@ class UIView extends Croquet.View {
             listener : this.onScroll,
             thisArg : this,
         });
+
+        this.subscribe('PDFViewerApplication', 'onbeforedocumentinit', this.onBeforeDocumentInit);
+        this.subscribe('PDFViewerApplication', 'ondocumentinit', this.onDocumentInit);
+
         /*
         this.publish('eventListener', 'add', {
             element : this.container,
@@ -28,6 +32,14 @@ class UIView extends Croquet.View {
         this.reset();
     }
 
+    onBeforeDocumentInit() {
+        this._ignoreScroll = true;
+    }
+    onDocumentInit() {
+        this._ignoreScroll = false;
+        this._updateScroll = true;
+    }
+
     onScroll(event) {
         if(!this._ignoreScroll) {
             const {scrollTop, scrollLeft} = this.container;
@@ -35,6 +47,8 @@ class UIView extends Croquet.View {
             const {viewId} = this;
 
             if(scrollTop || scrollLeft) {
+                console.log(scrollTop, scrollLeft);
+
                 this.publish('throttle', 'publish', {
                     scope : 'scroll',
                     event : 'set',
